@@ -1,0 +1,57 @@
+name: Flutter CI with Analysis
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-test-analyze:
+    name: Build, Test, and Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      - name: Restore Dependencies
+        run: flutter pub get
+
+      # Static Analysis
+      - name: Check Code Formatting
+        run: flutter format --set-exit-if-changed .
+
+      - name: Static Code Analysis
+        run: flutter analyze
+
+      - name: Security and Code Metrics Analysis
+        run: |
+          dart pub global activate dart_code_metrics
+          dart pub global run dart_code_metrics:metrics analyze lib
+
+      # Dynamic Analysis
+      - name: Run Unit Tests
+        run: flutter test --coverage
+
+      - name: Run Widget Tests
+        run: flutter test test/widget_tests
+
+      - name: Run Integration Tests
+        run: flutter drive --target=test_driver/app.dart
+
+      # Performance Benchmark
+      - name: Performance Benchmark
+        run: flutter drive --target=lib/main.dart --driver=test_driver/benchmark.dart
+
+      # Code Coverage
+      - name: Generate Coverage Report
+        run: |
+          flutter test --coverage
+          genhtml coverage/lcov.info --output-directory coverage/html
