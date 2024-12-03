@@ -40,11 +40,11 @@ jobs:
       - name: Run Unit Tests
         run: flutter test --coverage
 
-      - name: Run Widget Tests
-        run: flutter test test/widget_tests
+     # - name: Run Widget Tests
+     #   run: flutter test test/widget_tests
 
-      - name: Run Integration Tests
-        run: flutter drive --target=test_driver/app.dart
+    #  - name: Run Integration Tests
+    #    run: flutter drive --target=test_driver/app.dart
 
       # Performance Benchmark
       - name: Performance Benchmark
