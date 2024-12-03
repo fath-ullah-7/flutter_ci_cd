@@ -26,7 +26,7 @@ jobs:
 
       # Static Analysis
       - name: Check Code Formatting
-        run: flutter format . --set-exit-if-changed .
+        run: dart format .  --set-exit-if-changed .
 
       - name: Static Code Analysis
         run: flutter analyze
