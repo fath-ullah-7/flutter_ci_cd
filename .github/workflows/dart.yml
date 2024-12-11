@@ -10,7 +10,7 @@ jobs:
     name: android store release
     runs-on: ubuntu-latest
     env:
-      JAVA_VERSION: 8.0.201+10
+      JAVA_VERSION: 11.0.1+13
       FLUTTER_VERSION: 3.22.3
       AAB_PATH: build/app/outputs/bundle/release/app-release.aab
       KEYSTORE_PATH: android/testkey.jks
