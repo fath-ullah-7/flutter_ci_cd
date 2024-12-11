@@ -1,57 +1,85 @@
-name: Flutter CI with Analysis
+## Github Actions CI workflow to deploy to Internal testing in the Play Store
+name: CI_STORE_DEPLOY_ANDROID
 
 on:
+  # Run this workflow when any new code is pushed into the main branch
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  build-test-analyze:
-    name: Build, Test, and Analyze
+  store_deploy_android:
+    # Only run this job if the branch name starts with 'release/'
+    #if:  startsWith(github.head_ref, 'release/')
+    name: android store release
     runs-on: ubuntu-latest
+    env:
+      # Setup env variables that will be used throughout the workflow
+      JAVA_VERSION: 1.8
+      FLUTTER_VERSION: 3.22.3
+      AAB_PATH: build/app/outputs/bundle/release/app-release.aab
+      KEYSTORE_PATH: android/testkey.jks
+      KEY_PROPS_PATH: android/local.properties
+      SERVICE_ACCOUNT_PATH: lynx-v1-gocash-service-account-key.json
     steps:
-      - name: Checkout Code
+      # Checkout repository codebase
+      - name: Checkout the code
         uses: actions/checkout@v3
 
+      # Setup Java in the VM
+      - name: Setup Java to compile the Android project
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: ${{ env.JAVA_VERSION }}
+      
+      # Setup Flutter in the VM
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.3'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
 
-      - name: Restore Dependencies
+      # Decode Android env variables
+      - name: Decode Android keystore
+        run: echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > ${{ env.KEYSTORE_PATH }}
+
+      - name: Decode Android key properties
+        run: echo "${{ secrets.ANDROID_KEY_PROPERTIES }}" | base64 --decode > ${{ env.KEY_PROPS_PATH }}
+
+      # Decode Android release Service Account
+      - name: Decode Android Service Account
+        run: echo "${{ secrets.PRODUCTION_CREDENTIAL_FILE }}" | base64 --decode > ${{ env.SERVICE_ACCOUNT_PATH }}
+
+      # Run flutter commands
+      - name: Run flutter pub get
         run: flutter pub get
 
-      # Static Analysis
-      - name: Check Code Formatting
-        run: dart format .  --set-exit-if-changed .
+      - name: 📦 Install dependencies
+        run: flutter pub get
 
-      - name: Static Code Analysis
+      - name: 🕵️ Analyze to check for bad Dart/Flutter practices
         run: flutter analyze
 
-      - name: Security and Code Metrics Analysis
+      - name: 📉 Run all app tests
+        run: flutter test
+
+      # Build Android Bundle release file
+      - name: Build aab
         run: |
-          dart pub global activate dart_code_metrics
-          dart pub global run dart_code_metrics:metrics analyze lib
+          flutter build appbundle 
+          --release
 
-      # Dynamic Analysis
-      - name: Run Unit Tests
-        run: flutter test --coverage
+      # Upload generated aab to project artifacts
+      - name: Upload generated aab to the artifacts
+        uses: actions/upload-artifact@master
+        with:
+          name: aab-stores
+          path: {{ env.AAB_PATH }}
 
-     # - name: Run Widget Tests
-     #   run: flutter test test/widget_tests
-
-    #  - name: Run Integration Tests
-    #    run: flutter drive --target=test_driver/app.dart
-
-      # Performance Benchmark
-      - name: Performance Benchmark
-        run: flutter drive --target=lib/main.dart --driver=test_driver/benchmark.dart
-
-      # Code Coverage
-      - name: Generate Coverage Report
-        run: |
-          flutter test --coverage
-          genhtml coverage/lcov.info --output-directory coverage/html
+      # Deploy bundle to Google Play internal testing
+      - name: Deploy to Play Store (Internal testing)
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJson: {{ env.SERVICE_ACCOUNT_PATH }}
+          packageName: com.yourapp.package
+          releaseFiles: {{ env.AAB_PATH }}
+          track: internal
