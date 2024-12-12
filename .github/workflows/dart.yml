@@ -13,7 +13,7 @@ jobs:
       JAVA_VERSION: 11.0.1+13
       FLUTTER_VERSION: 3.22.3
       AAB_PATH: build/app/outputs/bundle/release/app-release.aab
-      KEYSTORE_PATH: android/testkey.jks
+      KEYSTORE_PATH: android/app/testkey.jks
       KEY_PROPS_PATH: android/local.properties
       SERVICE_ACCOUNT_PATH: android/google_service_account.json
     steps:
@@ -66,6 +66,6 @@ jobs:
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJson: ${{ env.SERVICE_ACCOUNT_PATH }}
-          packageName: com.example.flutter_ci_cd
+          packageName: com.fhkapp.fluttercicd
           releaseFiles: ${{ env.AAB_PATH }}
           track: internal
