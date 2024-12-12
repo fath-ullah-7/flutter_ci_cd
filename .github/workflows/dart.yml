@@ -40,12 +40,6 @@ jobs:
       - name: Decode Android Service Account
         run: echo "${{ secrets.ANDROID_RELEASE_SERVICE_ACCOUNT }}" | base64 --decode > ${{ env.SERVICE_ACCOUNT_PATH }}
 
-      - name: Install Gradle
-        run: sudo apt-get install -y gradle
-
-      - name: Generate Gradle Wrapper
-        run: gradle wrapper
-
       - name: Run flutter clean
         run: flutter clean
 
@@ -54,14 +48,6 @@ jobs:
 
       - name: 🕵️ Analyze to check for bad Dart/Flutter practices
         run: flutter analyze
-
-      - name: Build with Debug
-        run: ./gradlew bundleRelease --debug
-
-      - name: Verify Signing Config
-        run: |
-          cd android
-          ./gradlew signingReport
 
       - name: Build aab
         run: |
