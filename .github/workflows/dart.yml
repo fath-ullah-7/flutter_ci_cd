@@ -1,3 +1,4 @@
+## Github Actions CI workflow to deploy to Internal testing in the Play Store
 name: CI_STORE_DEPLOY_ANDROID
 
 on:
@@ -24,7 +25,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
-
+      
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -39,13 +40,11 @@ jobs:
       - name: Decode Android Service Account
         run: echo "${{ secrets.ANDROID_RELEASE_SERVICE_ACCOUNT }}" | base64 --decode > ${{ env.SERVICE_ACCOUNT_PATH }}
 
-      # Debug files step
-      - name: Debug Files
-        run: ls -la android/app/
+      - name: Install Gradle
+        run: sudo apt-get install -y gradle
 
-      # Verify signing configuration
-      - name: Verify Signing Config
-        run: ./gradlew signingReport
+      - name: Generate Gradle Wrapper
+        run: gradle wrapper
 
       - name: Run flutter clean
         run: flutter clean
@@ -56,9 +55,13 @@ jobs:
       - name: 🕵️ Analyze to check for bad Dart/Flutter practices
         run: flutter analyze
 
-      # Build with debug step
       - name: Build with Debug
         run: ./gradlew bundleRelease --debug
+
+      - name: Verify Signing Config
+        run: |
+          cd android
+          ./gradlew signingReport
 
       - name: Build aab
         run: |
