@@ -23,7 +23,7 @@ jobs:
       - name: Setup Java to compile the Android project
         uses: actions/setup-java@v2
         with:
-          distribution: 'adoptopenjdk' 
+          distribution: 'adoptium' 
           java-version: ${{ env.JAVA_VERSION }}
       
       - name: Setup Flutter
