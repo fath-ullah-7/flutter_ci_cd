@@ -10,7 +10,7 @@ jobs:
     name: android store release
     runs-on: ubuntu-latest
     env:
-      JAVA_VERSION: 11.0.1+13
+      JAVA_VERSION: 1.8
       FLUTTER_VERSION: 3.22.3
       AAB_PATH: build/app/outputs/bundle/release/app-release.aab
       KEYSTORE_PATH: android/app/testkey.jks
@@ -23,7 +23,6 @@ jobs:
       - name: Setup Java to compile the Android project
         uses: actions/setup-java@v2
         with:
-          distribution: 'zulu'
           java-version: ${{ env.JAVA_VERSION }}
       
       - name: Setup Flutter
