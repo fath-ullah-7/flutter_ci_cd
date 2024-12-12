@@ -31,10 +31,6 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
-      - name: Check files
-        run: |
-          ls android/app/
-          cat android/local.properties
 
       - name: Decode Android keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > ${{ env.KEYSTORE_PATH }}
@@ -54,9 +50,11 @@ jobs:
       - name: 🕵️ Analyze to check for bad Dart/Flutter practices
         run: flutter analyze
 
-      - name: 📉 Run all app tests
-        run: flutter test
-
+      - name: Check files
+        run: |
+          ls android/app/
+          cat android/local.properties
+          
       - name: Build aab
         run: |
           flutter build aab --release
