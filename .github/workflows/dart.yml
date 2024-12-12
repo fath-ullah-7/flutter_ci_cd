@@ -54,6 +54,19 @@ jobs:
         run: |
           ls android/app/
           cat android/local.properties
+
+      - name: Verify Keystore File
+        run: ls -l android/app/testkey.jks
+        
+      - name: Debug Secrets (Securely)
+        run: |
+          echo "STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}"
+          echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}"
+          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}"
+        env:
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           
       - name: Build aab
         run: |
